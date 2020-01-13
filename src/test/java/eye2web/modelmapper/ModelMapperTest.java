@@ -1,11 +1,15 @@
 package eye2web.modelmapper;
 
 import org.junit.Assert;
-import org.junit.Test;
+
 
 import eye2web.modelmapper.model.ModelARequest;
 import eye2web.modelmapper.model.ModelAResponse;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
 
     private final ModelMapper modelMapper;
@@ -18,10 +22,10 @@ public class ModelMapperTest {
     public void mapModelTest() throws Exception {
 
         final ModelARequest modelARequest = ModelARequest.builder()
-            .id(1)
-            .firstName("Remco")
-            .lastName("van der Heijden")
-            .build();
+                .id(1)
+                .firstName("Remco")
+                .lastName("van der Heijden")
+                .build();
 
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
 
@@ -35,8 +39,8 @@ public class ModelMapperTest {
     public void mapModelEmptyFirstNameTest() throws Exception {
 
         final ModelARequest modelARequest = ModelARequest.builder()
-            .lastName("van der Heijden")
-            .build();
+                .lastName("van der Heijden")
+                .build();
 
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
 
@@ -47,15 +51,15 @@ public class ModelMapperTest {
     @Test
     public void MapToExistingModelTest() throws Exception {
         final ModelARequest modelARequest = ModelARequest.builder()
-            .id(1)
-            .firstName("Remco")
-            .lastName("van der Heijden")
-            .build();
+                .id(1)
+                .firstName("Remco")
+                .lastName("van der Heijden")
+                .build();
 
         final ModelAResponse modelAResponse = ModelAResponse
-            .builder()
-            .doesNotMap("burp")
-            .build();
+                .builder()
+                .doesNotMap("burp")
+                .build();
 
         modelMapper.map(modelARequest, ModelAResponse.class, modelAResponse);
 
@@ -69,16 +73,16 @@ public class ModelMapperTest {
     @Test
     public void MapToExistingModelIgnoreNullTest() throws Exception {
         final ModelARequest modelARequest = ModelARequest.builder()
-            .id(1)
-            .firstName(null)
-            .lastName("van der Heijden")
-            .build();
+                .id(1)
+                .firstName(null)
+                .lastName("van der Heijden")
+                .build();
 
         final ModelAResponse modelAResponse = ModelAResponse
-            .builder()
-            .doesNotMap("burp")
-            .fName("Remco")
-            .build();
+                .builder()
+                .doesNotMap("burp")
+                .fName("Remco")
+                .build();
 
         modelMapper.map(modelARequest, ModelAResponse.class, modelAResponse);
 

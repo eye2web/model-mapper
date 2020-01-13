@@ -25,7 +25,7 @@ public class ModelMapper {
 
 
     public <D> D map(final Object source, final Class<D> destinationType)
-        throws Exception {
+            throws Exception {
 
         final Constructor<?> ctor = destinationType.getConstructor();
 
@@ -46,7 +46,7 @@ public class ModelMapper {
     }
 
     public <D> void map(final Object source, final Class<D> destinationType, final D destinationObj)
-        throws Exception {
+            throws Exception {
 
         final List<Map.Entry<String, Object>> sourceFieldValues = getFieldValues(source);
 
@@ -70,9 +70,9 @@ public class ModelMapper {
         }
 
         final Object[] objectValues = sourceFieldValues.stream()
-            .filter(s ->
-                Arrays.stream(multiValueFieldNames).anyMatch(mv -> mv.equals(s.getKey()))
-            ).map(Map.Entry::getValue).toArray();
+                .filter(s ->
+                        Arrays.stream(multiValueFieldNames).anyMatch(mv -> mv.equals(s.getKey()))
+                ).map(Map.Entry::getValue).toArray();
 
         if (objectValues.length == multiValueFieldNames.length) {
             mapFieldValues(destinationObj, field, multiValueFieldNames, objectValues);
@@ -86,8 +86,8 @@ public class ModelMapper {
         final String fieldName = getFieldName(field);
 
         final Optional<Map.Entry<String, Object>> vOpt = sourceFieldValues.stream()
-            .filter(s -> s.getKey().equals(fieldName))
-            .findFirst();
+                .filter(s -> s.getKey().equals(fieldName))
+                .findFirst();
 
         if (vOpt.isPresent()) {
             mapFieldValue(destinationObj, field, fieldName, vOpt.get().getValue());
@@ -128,24 +128,24 @@ public class ModelMapper {
 
     private void mapFieldValue(final Object destinationObj, final Field field, final String fieldName,
                                final Object fieldValue)
-        throws Exception {
+            throws Exception {
 
         final Object value;
 
         final MapFromField mapFromField = field.getAnnotation(MapFromField.class);
 
         if (mapFromField != null &&
-            shouldIgnoreFieldValue(mapFromField.properties(), fieldValue)) {
+                shouldIgnoreFieldValue(mapFromField.properties(), fieldValue)) {
             return;
         }
 
         if (mapFromField != null &&
-            !mapFromField.valueMapper().equals(DefaultValueMapper.class)) {
+                !mapFromField.valueMapper().equals(DefaultValueMapper.class)) {
 
             // TODO make singleton?
             final ValueMapper
-                objectValueMapper =
-                (ValueMapper) mapFromField.valueMapper().getConstructor().newInstance();
+                    objectValueMapper =
+                    (ValueMapper) mapFromField.valueMapper().getConstructor().newInstance();
 
             value = objectValueMapper.mapToValue(fieldName, fieldValue);
         } else {
@@ -163,13 +163,13 @@ public class ModelMapper {
 
     private boolean shouldIgnoreFieldValue(final FieldProperties[] fieldProperties, final Object fieldValue) {
         return (
-            Arrays.asList(fieldProperties).contains(FieldProperties.IGNORE_NULL_VALUES) &&
-                fieldValue == null);
+                Arrays.asList(fieldProperties).contains(FieldProperties.IGNORE_NULL_VALUES) &&
+                        fieldValue == null);
     }
 
     private void mapFieldValues(final Object destinationObj, final Field field, final String[] fieldNames,
                                 final Object[] fieldValues)
-        throws Exception {
+            throws Exception {
 
         final Object value;
 
@@ -179,8 +179,8 @@ public class ModelMapper {
 
             // TODO make singleton?
             final MultiValueMapper
-                objectValueMapper =
-                (MultiValueMapper) mapFromFields.multiValueMapper().getConstructor().newInstance();
+                    objectValueMapper =
+                    (MultiValueMapper) mapFromFields.multiValueMapper().getConstructor().newInstance();
 
             value = objectValueMapper.mapToValue(fieldNames, fieldValues);
         } else {
@@ -198,7 +198,7 @@ public class ModelMapper {
 
     private boolean setFieldPublic(final Field field, final Object object) {
         final boolean didSetPublic;
-
+        
         if (!field.canAccess(object)) {
             field.setAccessible(true);
             didSetPublic = true;
