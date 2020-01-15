@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="eye2web.modelmapper.ModelMapperTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2020-01-15T20:37:08" hostname="MacBook-Pro-van-Remco.local" time="0.026">
+<testsuite name="eye2web.modelmapper.ModelMapperTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2020-01-15T20:45:37" hostname="MacBook-Pro-van-Remco.local" time="0.054">
   <properties/>
-  <testcase name="mapModelTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.007"/>
-  <testcase name="MapToExistingModelTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.0"/>
-  <testcase name="MapToExistingModelIgnoreNullTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.0"/>
-  <testcase name="mapModelEmptyFirstNameTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.001"/>
+  <testcase name="mapModelTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.02"/>
+  <testcase name="MapToExistingModelTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.001"/>
+  <testcase name="MapToExistingModelIgnoreNullTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.001"/>
+  <testcase name="mapModelEmptyFirstNameTest" classname="eye2web.modelmapper.ModelMapperTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

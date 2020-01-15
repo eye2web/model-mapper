@@ -6,12 +6,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import eye2web.modelmapper.FieldProperties;
+import eye2web.modelmapper.value.map.DefaultValueMapper;
+
 @Target(ElementType.FIELD)
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MapFromFields {
+public @interface MapValueFromField {
 
-    String[] fieldNames();
+    String fieldName();
 
-    Class<?> multiValueMapper();
+    Class<?> valueMapper() default DefaultValueMapper.class;
+
+    FieldProperties[] properties() default {};
 }

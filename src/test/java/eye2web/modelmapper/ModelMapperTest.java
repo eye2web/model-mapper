@@ -1,22 +1,18 @@
 package eye2web.modelmapper;
 
-import org.junit.Assert;
-
-
 import eye2web.modelmapper.model.ModelARequest;
 import eye2web.modelmapper.model.ModelAResponse;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
 
-    private final ModelMapper modelMapper;
-
-    public ModelMapperTest() {
-        modelMapper = new ModelMapper();
-    }
+    @InjectMocks
+    private ModelMapper modelMapper;
 
     @Test
     public void mapModelTest() throws Exception {

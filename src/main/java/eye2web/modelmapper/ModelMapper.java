@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import eye2web.modelmapper.annotations.MapFromField;
-import eye2web.modelmapper.annotations.MapFromFields;
+import eye2web.modelmapper.annotations.MapValueFromField;
+import eye2web.modelmapper.annotations.MapValuesFromFields;
 import eye2web.modelmapper.exception.NoArgsConstructorException;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.MultiValueMapper;
@@ -41,7 +41,7 @@ public class ModelMapper implements ModelMapperI {
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
 
-            if (Objects.nonNull(field.getAnnotation(MapFromFields.class))) {
+            if (Objects.nonNull(field.getAnnotation(MapValuesFromFields.class))) {
                 tryMapMultiValueField(field, sourceFieldValues, destinationObj);
             } else {
                 tryMapSingleValueField(field, sourceFieldValues, destinationObj);
@@ -94,13 +94,13 @@ public class ModelMapper implements ModelMapperI {
     }
 
     private String getFieldName(final Field field) {
-        final MapFromField mapFromField = field.getAnnotation(MapFromField.class);
-        return Objects.isNull(mapFromField) ? field.getName() : mapFromField.fieldName();
+        final MapValueFromField mapValueFromField = field.getAnnotation(MapValueFromField.class);
+        return Objects.isNull(mapValueFromField) ? field.getName() : mapValueFromField.fieldName();
     }
 
     private String[] getFieldNames(final Field field) {
-        final MapFromFields mapFromFields = field.getAnnotation(MapFromFields.class);
-        return Objects.nonNull(mapFromFields) ? mapFromFields.fieldNames() : null;
+        final MapValuesFromFields mapValuesFromFields = field.getAnnotation(MapValuesFromFields.class);
+        return Objects.nonNull(mapValuesFromFields) ? mapValuesFromFields.fieldNames() : null;
     }
 
 
@@ -131,20 +131,20 @@ public class ModelMapper implements ModelMapperI {
 
         final Object value;
 
-        final MapFromField mapFromField = field.getAnnotation(MapFromField.class);
+        final MapValueFromField mapValueFromField = field.getAnnotation(MapValueFromField.class);
 
-        if (Objects.nonNull(mapFromField) &&
-                shouldIgnoreFieldValue(mapFromField.properties(), fieldValue)) {
+        if (Objects.nonNull(mapValueFromField) &&
+                shouldIgnoreFieldValue(mapValueFromField.properties(), fieldValue)) {
             return;
         }
 
-        if (Objects.nonNull(mapFromField) &&
-                !mapFromField.valueMapper().equals(DefaultValueMapper.class)) {
+        if (Objects.nonNull(mapValueFromField) &&
+                !mapValueFromField.valueMapper().equals(DefaultValueMapper.class)) {
 
             // TODO make singleton? // DI Container
             final ValueMapper
                     objectValueMapper =
-                    (ValueMapper) mapFromField.valueMapper().getConstructor().newInstance();
+                    (ValueMapper) mapValueFromField.valueMapper().getConstructor().newInstance();
 
             value = objectValueMapper.mapToValue(fieldName, fieldValue);
         } else {
@@ -172,14 +172,14 @@ public class ModelMapper implements ModelMapperI {
 
         final Object value;
 
-        final MapFromFields mapFromFields = field.getAnnotation(MapFromFields.class);
+        final MapValuesFromFields mapValuesFromFields = field.getAnnotation(MapValuesFromFields.class);
 
-        if (Objects.nonNull(mapFromFields)) {
+        if (Objects.nonNull(mapValuesFromFields)) {
 
             // TODO make singleton?
             final MultiValueMapper
                     objectValueMapper =
-                    (MultiValueMapper) mapFromFields.multiValueMapper().getConstructor().newInstance();
+                    (MultiValueMapper) mapValuesFromFields.multiValueMapper().getConstructor().newInstance();
 
             value = objectValueMapper.mapToValue(fieldNames, fieldValues);
         } else {
