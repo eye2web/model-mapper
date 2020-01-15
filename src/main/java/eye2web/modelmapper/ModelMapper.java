@@ -1,21 +1,17 @@
 package eye2web.modelmapper;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import eye2web.modelmapper.annotations.MapFromField;
 import eye2web.modelmapper.annotations.MapFromFields;
+import eye2web.modelmapper.exception.NoArgsConstructorException;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.MultiValueMapper;
 import eye2web.modelmapper.value.map.ValueMapper;
 
-public class ModelMapper {
+public class ModelMapper implements ModelMapperI {
 
     private final DefaultValueMapper defaultHandlerMapper;
 
@@ -23,40 +19,43 @@ public class ModelMapper {
         defaultHandlerMapper = new DefaultValueMapper();
     }
 
-
+    @Override
     public <D> D map(final Object source, final Class<D> destinationType)
             throws Exception {
 
-        final Constructor<?> ctor = destinationType.getConstructor();
+        final D destinationObj = destinationType.cast(createEmptyInstanceOfNoArgsClass(destinationType));
 
+        mapUsingFieldInjection(source, destinationObj);
+
+        return destinationObj;
+    }
+
+    @Override
+    public <D> void map(final Object source, final D destinationObj)
+            throws Exception {
+        mapUsingFieldInjection(source, destinationObj);
+    }
+
+    private void mapUsingFieldInjection(final Object source, final Object destinationObj) throws Exception {
         final List<Map.Entry<String, Object>> sourceFieldValues = getFieldValues(source);
-
-        final D destinationObj = (D) ctor.newInstance();
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
 
-            if (field.getAnnotation(MapFromFields.class) != null) {
+            if (Objects.nonNull(field.getAnnotation(MapFromFields.class))) {
                 tryMapMultiValueField(field, sourceFieldValues, destinationObj);
             } else {
                 tryMapSingleValueField(field, sourceFieldValues, destinationObj);
             }
         }
-
-        return destinationObj;
     }
 
-    public <D> void map(final Object source, final Class<D> destinationType, final D destinationObj)
-            throws Exception {
-
-        final List<Map.Entry<String, Object>> sourceFieldValues = getFieldValues(source);
-
-        for (final Field field : destinationObj.getClass().getDeclaredFields()) {
-
-            if (field.getAnnotation(MapFromFields.class) != null) {
-                tryMapMultiValueField(field, sourceFieldValues, destinationObj);
-            } else {
-                tryMapSingleValueField(field, sourceFieldValues, destinationObj);
-            }
+    private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType)
+            throws NoArgsConstructorException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        try {
+            return classType.getConstructor()
+                    .newInstance();
+        } catch (NoSuchMethodException ex) {
+            throw new NoArgsConstructorException(classType.getName());
         }
     }
 
@@ -65,7 +64,7 @@ public class ModelMapper {
 
         final String[] multiValueFieldNames = getFieldNames(field);
 
-        if (multiValueFieldNames == null) {
+        if (Objects.isNull(multiValueFieldNames)) {
             return;
         }
 
@@ -96,12 +95,12 @@ public class ModelMapper {
 
     private String getFieldName(final Field field) {
         final MapFromField mapFromField = field.getAnnotation(MapFromField.class);
-        return ((mapFromField == null) ? field.getName() : mapFromField.fieldName());
+        return Objects.isNull(mapFromField) ? field.getName() : mapFromField.fieldName();
     }
 
     private String[] getFieldNames(final Field field) {
         final MapFromFields mapFromFields = field.getAnnotation(MapFromFields.class);
-        return ((mapFromFields == null) ? null : mapFromFields.fieldNames());
+        return Objects.nonNull(mapFromFields) ? mapFromFields.fieldNames() : null;
     }
 
 
@@ -134,15 +133,15 @@ public class ModelMapper {
 
         final MapFromField mapFromField = field.getAnnotation(MapFromField.class);
 
-        if (mapFromField != null &&
+        if (Objects.nonNull(mapFromField) &&
                 shouldIgnoreFieldValue(mapFromField.properties(), fieldValue)) {
             return;
         }
 
-        if (mapFromField != null &&
+        if (Objects.nonNull(mapFromField) &&
                 !mapFromField.valueMapper().equals(DefaultValueMapper.class)) {
 
-            // TODO make singleton?
+            // TODO make singleton? // DI Container
             final ValueMapper
                     objectValueMapper =
                     (ValueMapper) mapFromField.valueMapper().getConstructor().newInstance();
@@ -164,7 +163,7 @@ public class ModelMapper {
     private boolean shouldIgnoreFieldValue(final FieldProperties[] fieldProperties, final Object fieldValue) {
         return (
                 Arrays.asList(fieldProperties).contains(FieldProperties.IGNORE_NULL_VALUES) &&
-                        fieldValue == null);
+                        Objects.isNull(fieldValue));
     }
 
     private void mapFieldValues(final Object destinationObj, final Field field, final String[] fieldNames,
@@ -175,7 +174,7 @@ public class ModelMapper {
 
         final MapFromFields mapFromFields = field.getAnnotation(MapFromFields.class);
 
-        if (mapFromFields != null) {
+        if (Objects.nonNull(mapFromFields)) {
 
             // TODO make singleton?
             final MultiValueMapper
@@ -198,7 +197,7 @@ public class ModelMapper {
 
     private boolean setFieldPublic(final Field field, final Object object) {
         final boolean didSetPublic;
-        
+
         if (!field.canAccess(object)) {
             field.setAccessible(true);
             didSetPublic = true;

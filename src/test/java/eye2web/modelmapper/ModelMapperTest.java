@@ -61,7 +61,7 @@ public class ModelMapperTest {
                 .doesNotMap("burp")
                 .build();
 
-        modelMapper.map(modelARequest, ModelAResponse.class, modelAResponse);
+        modelMapper.map(modelARequest, modelAResponse);
 
         Assert.assertEquals(1, modelAResponse.getId());
         Assert.assertEquals("Remco", modelAResponse.getFirstName());
@@ -84,7 +84,7 @@ public class ModelMapperTest {
                 .fName("Remco")
                 .build();
 
-        modelMapper.map(modelARequest, ModelAResponse.class, modelAResponse);
+        modelMapper.map(modelARequest, modelAResponse);
 
         Assert.assertEquals(1, modelAResponse.getId());
         Assert.assertNull(modelAResponse.getFirstName());
