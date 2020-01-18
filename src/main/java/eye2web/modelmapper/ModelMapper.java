@@ -1,15 +1,17 @@
 package eye2web.modelmapper;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import eye2web.modelmapper.annotations.MapValueFromField;
-import eye2web.modelmapper.annotations.MapValuesFromFields;
+import eye2web.modelmapper.annotations.MapValue;
+import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.exception.NoArgsConstructorException;
+import eye2web.modelmapper.model.MapFromField;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.MultiValueMapper;
 import eye2web.modelmapper.value.map.ValueMapper;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ModelMapper implements ModelMapperI {
 
@@ -41,7 +43,7 @@ public class ModelMapper implements ModelMapperI {
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
 
-            if (Objects.nonNull(field.getAnnotation(MapValuesFromFields.class))) {
+            if (Objects.nonNull(field.getAnnotation(MapValues.class))) {
                 tryMapMultiValueField(field, sourceFieldValues, destinationObj);
             } else {
                 tryMapSingleValueField(field, sourceFieldValues, destinationObj);
@@ -68,13 +70,23 @@ public class ModelMapper implements ModelMapperI {
             return;
         }
 
-        final Object[] objectValues = sourceFieldValues.stream()
+        final Set<MapFromField<?>> mapFromFieldsSet = sourceFieldValues.stream()
                 .filter(s ->
                         Arrays.stream(multiValueFieldNames).anyMatch(mv -> mv.equals(s.getKey()))
-                ).map(Map.Entry::getValue).toArray();
+                ).map((sourceField) ->
 
-        if (objectValues.length == multiValueFieldNames.length) {
-            mapFieldValues(destinationObj, field, multiValueFieldNames, objectValues);
+                        MapFromField.builder()
+                                .fieldName(sourceField.getKey())
+                                .fieldValue(sourceField.getValue())
+                                .build()
+                ).collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (final var t : mapFromFieldsSet) {
+            System.out.println(t.getFieldValue());
+        }
+
+        if (mapFromFieldsSet.size() == multiValueFieldNames.length) {
+            mapFieldValues(destinationObj, field, mapFromFieldsSet);
         }
     }
 
@@ -94,13 +106,13 @@ public class ModelMapper implements ModelMapperI {
     }
 
     private String getFieldName(final Field field) {
-        final MapValueFromField mapValueFromField = field.getAnnotation(MapValueFromField.class);
-        return Objects.isNull(mapValueFromField) ? field.getName() : mapValueFromField.fieldName();
+        final MapValue mapValue = field.getAnnotation(MapValue.class);
+        return Objects.isNull(mapValue) ? field.getName() : mapValue.fieldName();
     }
 
     private String[] getFieldNames(final Field field) {
-        final MapValuesFromFields mapValuesFromFields = field.getAnnotation(MapValuesFromFields.class);
-        return Objects.nonNull(mapValuesFromFields) ? mapValuesFromFields.fieldNames() : null;
+        final MapValues mapValues = field.getAnnotation(MapValues.class);
+        return Objects.nonNull(mapValues) ? mapValues.fieldNames() : null;
     }
 
 
@@ -131,24 +143,28 @@ public class ModelMapper implements ModelMapperI {
 
         final Object value;
 
-        final MapValueFromField mapValueFromField = field.getAnnotation(MapValueFromField.class);
+        final MapValue mapValue = field.getAnnotation(MapValue.class);
 
-        if (Objects.nonNull(mapValueFromField) &&
-                shouldIgnoreFieldValue(mapValueFromField.properties(), fieldValue)) {
+        if (shouldIgnoreFieldValue(mapValue, fieldValue)) {
             return;
         }
 
-        if (Objects.nonNull(mapValueFromField) &&
-                !mapValueFromField.valueMapper().equals(DefaultValueMapper.class)) {
+        final var mapFromField = MapFromField.builder()
+                .fieldName(fieldName)
+                .fieldValue(fieldValue)
+                .build();
+
+        if (Objects.nonNull(mapValue) &&
+                !mapValue.valueMapper().equals(DefaultValueMapper.class)) {
 
             // TODO make singleton? // DI Container
             final ValueMapper
                     objectValueMapper =
-                    (ValueMapper) mapValueFromField.valueMapper().getConstructor().newInstance();
+                    (ValueMapper) mapValue.valueMapper().getConstructor().newInstance();
 
-            value = objectValueMapper.mapToValue(fieldName, fieldValue);
+            value = objectValueMapper.mapToValue(mapFromField);
         } else {
-            value = defaultHandlerMapper.mapToValue(fieldName, fieldValue);
+            value = defaultHandlerMapper.mapToValue(mapFromField);
         }
 
         boolean isPrivate = setFieldPublic(field, destinationObj);
@@ -160,28 +176,27 @@ public class ModelMapper implements ModelMapperI {
         }
     }
 
-    private boolean shouldIgnoreFieldValue(final FieldProperties[] fieldProperties, final Object fieldValue) {
-        return (
-                Arrays.asList(fieldProperties).contains(FieldProperties.IGNORE_NULL_VALUES) &&
-                        Objects.isNull(fieldValue));
+    private boolean shouldIgnoreFieldValue(final MapValue mapValue, final Object fieldValue) {
+        return (Objects.nonNull(mapValue) &&
+                Arrays.asList(mapValue.properties()).contains(FieldProperties.IGNORE_NULL_VALUES) &&
+                Objects.isNull(fieldValue));
     }
 
-    private void mapFieldValues(final Object destinationObj, final Field field, final String[] fieldNames,
-                                final Object[] fieldValues)
+    private void mapFieldValues(final Object destinationObj, final Field field, final Set<MapFromField<?>> mapFromFieldSet)
             throws Exception {
 
         final Object value;
 
-        final MapValuesFromFields mapValuesFromFields = field.getAnnotation(MapValuesFromFields.class);
+        final MapValues mapValues = field.getAnnotation(MapValues.class);
 
-        if (Objects.nonNull(mapValuesFromFields)) {
+        if (Objects.nonNull(mapValues)) {
 
             // TODO make singleton?
             final MultiValueMapper
                     objectValueMapper =
-                    (MultiValueMapper) mapValuesFromFields.multiValueMapper().getConstructor().newInstance();
+                    (MultiValueMapper) mapValues.multiValueMapper().getConstructor().newInstance();
 
-            value = objectValueMapper.mapToValue(fieldNames, fieldValues);
+            value = objectValueMapper.mapToValue(mapFromFieldSet);
         } else {
             value = null;
         }

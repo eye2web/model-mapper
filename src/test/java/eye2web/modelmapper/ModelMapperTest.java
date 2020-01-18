@@ -2,6 +2,7 @@ package eye2web.modelmapper;
 
 import eye2web.modelmapper.model.ModelARequest;
 import eye2web.modelmapper.model.ModelAResponse;
+import eye2web.modelmapper.model.SimpleNestedModel;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,12 +16,15 @@ public class ModelMapperTest {
     private ModelMapper modelMapper;
 
     @Test
-    public void mapModelTest() throws Exception {
+    public void shouldFullyMapModelAResponseToRequest() throws Exception {
 
         final ModelARequest modelARequest = ModelARequest.builder()
                 .id(1)
                 .firstName("Remco")
                 .lastName("van der Heijden")
+                .simpleNestedModel(SimpleNestedModel.builder()
+                        .nestedModelName("nested name")
+                        .build())
                 .build();
 
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
@@ -29,10 +33,11 @@ public class ModelMapperTest {
         Assert.assertEquals("Remco", modelAResponse.getFirstName());
         Assert.assertEquals("van der Heijden", modelAResponse.getLName());
         Assert.assertEquals("Remco van der Heijden", modelAResponse.getFullName());
+        Assert.assertEquals("nested name", modelAResponse.getSimpleNestedModel().getNestedModelName());
     }
 
     @Test
-    public void mapModelEmptyFirstNameTest() throws Exception {
+    public void shouldNotMapEmptyFirstName() throws Exception {
 
         final ModelARequest modelARequest = ModelARequest.builder()
                 .lastName("van der Heijden")
@@ -45,7 +50,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void MapToExistingModelTest() throws Exception {
+    public void shouldMapToExistingTarget() throws Exception {
         final ModelARequest modelARequest = ModelARequest.builder()
                 .id(1)
                 .firstName("Remco")
@@ -67,7 +72,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void MapToExistingModelIgnoreNullTest() throws Exception {
+    public void shouldMapToExistingTargetIgnoringNulls() throws Exception {
         final ModelARequest modelARequest = ModelARequest.builder()
                 .id(1)
                 .firstName(null)

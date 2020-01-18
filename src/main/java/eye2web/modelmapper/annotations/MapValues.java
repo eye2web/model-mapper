@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MapValuesFromFields {
+public @interface MapValues {
 
     String[] fieldNames();
 

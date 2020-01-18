@@ -3,6 +3,9 @@ plugins {
 }
 
 ext {
+    lombokVersion = '1.18.10'
+    manifoldVersion = '2019.1.32'
+
     sonatypeUsername = ''
     sonatypePassword = ''
     groupName = 'com.github.eye2web'
@@ -26,12 +29,25 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    implementation 'systems.manifold:manifold-ext:2019.1.32',
+            "org.projectlombok:lombok:$lombokVersion"
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.10'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
+    testCompile 'junit:junit:4.12',
+            'org.mockito:mockito-all:1.10.19',
+            "systems.manifold:manifold-ext:$manifoldVersion"
 
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion",
+            "systems.manifold:manifold-ext:$manifoldVersion"
+
+    testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion",
+            "systems.manifold:manifold-ext:$manifoldVersion"
+
+}
+
+tasks.withType(JavaCompile) {
+    // If you DO NOT define a module-info.java file:
+    options.compilerArgs += ['-Xplugin:Manifold']
 }
 
 test {

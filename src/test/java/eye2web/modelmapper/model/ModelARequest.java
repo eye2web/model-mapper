@@ -11,4 +11,6 @@ public class ModelARequest {
 
     private String firstName;
     private String lastName;
+
+    private SimpleNestedModel simpleNestedModel;
 }

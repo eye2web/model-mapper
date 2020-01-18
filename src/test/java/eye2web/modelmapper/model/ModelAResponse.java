@@ -1,8 +1,8 @@
 package eye2web.modelmapper.model;
 
 import eye2web.modelmapper.FieldProperties;
-import eye2web.modelmapper.annotations.MapValueFromField;
-import eye2web.modelmapper.annotations.MapValuesFromFields;
+import eye2web.modelmapper.annotations.MapValue;
+import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.handler.ConcatMultiValueMapper;
 import eye2web.modelmapper.handler.FirstNameValueMapper;
 import lombok.AllArgsConstructor;
@@ -20,17 +20,19 @@ public class ModelAResponse {
 
     private String firstName;
 
-    @MapValueFromField(fieldName = "firstName",
+    @MapValue(fieldName = "firstName",
             valueMapper = FirstNameValueMapper.class,
             properties = {FieldProperties.IGNORE_NULL_VALUES})
     private String fName;
 
-    @MapValueFromField(fieldName = "lastName")
+    @MapValue(fieldName = "lastName")
     private String lName;
 
-    @MapValuesFromFields(fieldNames = {"firstName", "lastName"}, multiValueMapper = ConcatMultiValueMapper.class)
+    @MapValues(fieldNames = {"firstName", "lastName"},
+            multiValueMapper = ConcatMultiValueMapper.class)
     private String fullName;
 
     private String doesNotMap;
 
+    private SimpleNestedModel simpleNestedModel;
 }

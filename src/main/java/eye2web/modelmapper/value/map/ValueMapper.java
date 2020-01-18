@@ -1,7 +1,9 @@
 package eye2web.modelmapper.value.map;
 
+import eye2web.modelmapper.model.MapFromField;
+
 public interface ValueMapper {
 
-    Object mapToValue(final String fieldName, final Object fieldValue);
+    Object mapToValue(final MapFromField<?> mapFromField);
 
 }

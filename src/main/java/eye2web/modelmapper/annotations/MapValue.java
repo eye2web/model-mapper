@@ -12,7 +12,7 @@ import eye2web.modelmapper.value.map.DefaultValueMapper;
 @Target(ElementType.FIELD)
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MapValueFromField {
+public @interface MapValue {
 
     String fieldName();
 
