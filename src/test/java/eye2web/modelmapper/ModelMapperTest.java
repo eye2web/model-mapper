@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.LocalDate;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
 
@@ -22,6 +24,7 @@ public class ModelMapperTest {
                 .id(1)
                 .firstName("Remco")
                 .lastName("van der Heijden")
+                .birthday(LocalDate.of(1990, 3, 14))
                 .simpleNestedModel(SimpleNestedModel.builder()
                         .nestedModelName("nested name")
                         .build())
@@ -34,6 +37,7 @@ public class ModelMapperTest {
         Assert.assertEquals("van der Heijden", modelAResponse.getLName());
         Assert.assertEquals("Remco van der Heijden", modelAResponse.getFullName());
         Assert.assertEquals("nested name", modelAResponse.getSimpleNestedModel().getNestedModelName());
+        Assert.assertEquals(29, modelAResponse.getAge());
     }
 
     @Test

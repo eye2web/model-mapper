@@ -3,6 +3,7 @@ package eye2web.modelmapper.model;
 import eye2web.modelmapper.FieldProperties;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
+import eye2web.modelmapper.handler.AgeValueMapper;
 import eye2web.modelmapper.handler.ConcatMultiValueMapper;
 import eye2web.modelmapper.handler.FirstNameValueMapper;
 import lombok.AllArgsConstructor;
@@ -35,4 +36,7 @@ public class ModelAResponse {
     private String doesNotMap;
 
     private SimpleNestedModel simpleNestedModel;
+
+    @MapValue(fieldName = "birthday", valueMapper = AgeValueMapper.class)
+    private int age;
 }
