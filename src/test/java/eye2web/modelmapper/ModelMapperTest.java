@@ -29,7 +29,7 @@ public class ModelMapperTest {
                         .nestedModelName("nested name")
                         .build())
                 .build();
-
+        
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
 
         Assert.assertEquals(1, modelAResponse.getId());

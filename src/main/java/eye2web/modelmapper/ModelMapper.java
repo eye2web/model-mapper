@@ -7,9 +7,12 @@ import eye2web.modelmapper.model.MapFromField;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.MultiValueMapper;
 import eye2web.modelmapper.value.map.ValueMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,10 @@ public class ModelMapper implements ModelMapperI {
     }
 
     private void mapUsingFieldInjection(final Object source, final Object destinationObj) throws Exception {
+
+        //todo remove Testing only
+        mapUsingGetterSetter(source, destinationObj);
+
         final List<Map.Entry<String, Object>> sourceFieldValues = getFieldValues(source);
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
@@ -49,6 +56,64 @@ public class ModelMapper implements ModelMapperI {
                 tryMapSingleValueField(field, sourceFieldValues, destinationObj);
             }
         }
+    }
+
+    private void mapUsingGetterSetter(final Object source, final Object destinationObj) {
+
+        // Map fields to corresponding getter methods
+        final var getters = Arrays.stream(source.getClass().getDeclaredFields())
+                .map(field -> {
+                    final var methodOpt =
+                            Arrays.stream(source.getClass().getMethods())
+                                    .filter(method -> method.getName().startsWith("get"))
+                                    .filter(
+                                            method -> method.getName()
+                                                    .endsWith(StringUtils.capitalize(field.getName()))
+                                    ).findAny();
+
+                    return methodOpt.map(method -> Pair.of(field, method)).orElse(null);
+                }).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // Map fields to corresponding setter methods
+        final var setters = Arrays.stream(destinationObj.getClass().getDeclaredFields())
+                .map(field -> {
+                    final var methodOpt = Arrays.stream(destinationObj.getClass().getMethods())
+                            .filter(method -> method.getName().startsWith("set"))
+                            .filter(
+                                    method -> method.getName()
+                                            .endsWith(StringUtils.capitalize(field.getName()))
+                            ).findAny();
+
+                    return methodOpt.map(method -> Pair.of(field, method)).orElse(null);
+                }).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        mapGettersToSetters(source, getters, destinationObj, setters);
+    }
+
+    private void mapGettersToSetters(final Object source,
+                                     final List<Pair<Field, Method>> getters,
+                                     final Object destination,
+                                     final List<Pair<Field, Method>> setters) {
+
+
+        setters.forEach(setter -> {
+            getters.stream().filter(getter -> getter.getKey().getName().equals(setter.getKey().getName()))
+                    .findAny()
+                    .ifPresent(getter -> {
+
+                        try {
+                            final var value = getter.getValue().invoke(source);
+                            setter.getValue().invoke(destination, value);
+
+                        } catch (Exception ex) {
+                            System.out.println(
+                                    ex.getMessage()
+                            );
+                        }
+                    });
+        });
     }
 
     private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType)
