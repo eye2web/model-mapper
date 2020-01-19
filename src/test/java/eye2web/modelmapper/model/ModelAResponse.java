@@ -37,6 +37,10 @@ public class ModelAResponse {
 
     private SimpleNestedModel simpleNestedModel;
 
+    private boolean isActive;
+
+    private boolean valid;
+
     @MapValue(fieldName = "birthday", valueMapper = AgeValueMapper.class)
     private int age;
 }

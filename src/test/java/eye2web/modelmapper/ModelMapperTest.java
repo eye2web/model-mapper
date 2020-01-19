@@ -22,6 +22,8 @@ public class ModelMapperTest {
 
         final ModelARequest modelARequest = ModelARequest.builder()
                 .id(1)
+                .isActive(true)
+                .valid(true)
                 .firstName("Remco")
                 .lastName("van der Heijden")
                 .birthday(LocalDate.of(1990, 3, 14))
@@ -29,10 +31,12 @@ public class ModelMapperTest {
                         .nestedModelName("nested name")
                         .build())
                 .build();
-        
+
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
 
         Assert.assertEquals(1, modelAResponse.getId());
+        Assert.assertTrue(modelAResponse.isActive());
+        Assert.assertTrue(modelAResponse.isValid());
         Assert.assertEquals("Remco", modelAResponse.getFirstName());
         Assert.assertEquals("van der Heijden", modelAResponse.getLName());
         Assert.assertEquals("Remco van der Heijden", modelAResponse.getFullName());
@@ -45,6 +49,7 @@ public class ModelMapperTest {
 
         final ModelARequest modelARequest = ModelARequest.builder()
                 .lastName("van der Heijden")
+                .birthday(LocalDate.of(1990, 3, 14))
                 .build();
 
         final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
@@ -59,6 +64,7 @@ public class ModelMapperTest {
                 .id(1)
                 .firstName("Remco")
                 .lastName("van der Heijden")
+                .birthday(LocalDate.of(1990, 3, 14))
                 .build();
 
         final ModelAResponse modelAResponse = ModelAResponse
@@ -81,6 +87,7 @@ public class ModelMapperTest {
                 .id(1)
                 .firstName(null)
                 .lastName("van der Heijden")
+                .birthday(LocalDate.of(1990, 3, 14))
                 .build();
 
         final ModelAResponse modelAResponse = ModelAResponse

@@ -65,14 +65,17 @@ public class ModelMapper implements ModelMapperI {
                 .map(field -> {
                     final var methodOpt =
                             Arrays.stream(source.getClass().getMethods())
-                                    .filter(method -> method.getName().startsWith("get"))
+                                    .filter(method -> method.getName().startsWith("get") ||
+                                            method.getName().startsWith("is"))
                                     .filter(
                                             method -> method.getName()
-                                                    .endsWith(StringUtils.capitalize(field.getName()))
+                                                    .endsWith(StringUtils.capitalize(field.getName())) ||
+                                                    method.getName().equals(field.getName())
                                     ).findAny();
 
-                    return methodOpt.map(method -> Pair.of(field, method)).orElse(null);
-                }).filter(Objects::nonNull)
+                    return methodOpt.map(method -> Pair.of(field, method));
+                }).filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
         // Map fields to corresponding setter methods
@@ -82,11 +85,16 @@ public class ModelMapper implements ModelMapperI {
                             .filter(method -> method.getName().startsWith("set"))
                             .filter(
                                     method -> method.getName()
-                                            .endsWith(StringUtils.capitalize(field.getName()))
+                                            .endsWith(StringUtils.capitalize(field.getName())) ||
+                                            (field.getName().startsWith("is") &&
+                                                    method.getName()
+                                                            .endsWith(field.getName().substring(2))
+                                            )
                             ).findAny();
 
-                    return methodOpt.map(method -> Pair.of(field, method)).orElse(null);
-                }).filter(Objects::nonNull)
+                    return methodOpt.map(method -> Pair.of(field, method));
+                }).filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
         mapGettersToSetters(source, getters, destinationObj, setters);

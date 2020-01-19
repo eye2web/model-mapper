@@ -30,7 +30,8 @@ apply plugin: 'signing'
 
 dependencies {
     implementation 'systems.manifold:manifold-ext:2019.1.32',
-            "org.projectlombok:lombok:$lombokVersion"
+            "org.projectlombok:lombok:$lombokVersion",\
+            'org.apache.commons:commons-lang3:3.9'
 
     testCompile 'junit:junit:4.12',
             'org.mockito:mockito-all:1.10.19',
