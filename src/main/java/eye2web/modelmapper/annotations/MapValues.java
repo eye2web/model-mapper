@@ -1,5 +1,7 @@
 package eye2web.modelmapper.annotations;
 
+import eye2web.modelmapper.value.map.MultiValueMapper;
+
 import java.lang.annotation.*;
 
 @Target(ElementType.FIELD)
@@ -9,5 +11,5 @@ public @interface MapValues {
 
     String[] fieldNames();
 
-    Class<?> multiValueMapper();
+    Class<? extends MultiValueMapper> multiValueMapper();
 }

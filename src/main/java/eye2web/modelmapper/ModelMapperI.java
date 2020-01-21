@@ -22,4 +22,11 @@ public interface ModelMapperI {
      */
     <D> void map(final Object source, final D destinationObj)
             throws Exception;
+
+
+    /**
+     * Releases resources like ValueMapper(s) instances
+     */
+    void dispose();
+
 }

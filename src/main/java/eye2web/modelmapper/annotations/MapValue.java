@@ -1,13 +1,10 @@
 package eye2web.modelmapper.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import eye2web.modelmapper.FieldProperties;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
+import eye2web.modelmapper.value.map.ValueMapper;
+
+import java.lang.annotation.*;
 
 @Target(ElementType.FIELD)
 @Inherited
@@ -16,7 +13,7 @@ public @interface MapValue {
 
     String fieldName();
 
-    Class<?> valueMapper() default DefaultValueMapper.class;
+    Class<? extends ValueMapper> valueMapper() default DefaultValueMapper.class;
 
     FieldProperties[] properties() default {};
 }

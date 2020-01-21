@@ -4,9 +4,8 @@ import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.exception.NoArgsConstructorException;
 import eye2web.modelmapper.model.FromField;
-import eye2web.modelmapper.value.map.DefaultValueMapper;
-import eye2web.modelmapper.value.map.MultiValueMapper;
-import eye2web.modelmapper.value.map.ValueMapper;
+import eye2web.modelmapper.value.map.*;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -16,13 +15,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
 public class ModelMapper implements ModelMapperI {
-
-    private final DefaultValueMapper defaultHandlerMapper;
-
-    public ModelMapper() {
-        defaultHandlerMapper = new DefaultValueMapper();
-    }
 
     @Override
     public <D> D map(final Object source, final Class<D> destinationType)
@@ -39,6 +33,12 @@ public class ModelMapper implements ModelMapperI {
     public <D> void map(final Object source, final D destinationObj)
             throws Exception {
         mapUsingFieldInjection(source, destinationObj);
+    }
+
+    @Override
+    public void dispose() {
+        ValueMapperContainer.getInstance().dispose();
+        MultiValueMapperContainer.getInstance().dispose();
     }
 
     private void mapUsingFieldInjection(final Object source, final Object destinationObj) throws Exception {
@@ -60,13 +60,17 @@ public class ModelMapper implements ModelMapperI {
 
     private void mapUsingGetterSetter(final Object source, final Object destinationObj) {
 
+        final var METHOD_GET_PREFIX = "get";
+        final var METHOD_SET_PREFIX = "set";
+        final var METHOD_IS_PREFIX = "is";
+
         // Map fields to corresponding getter methods
         final var getters = Arrays.stream(source.getClass().getDeclaredFields())
                 .map(field -> {
                     final var methodOpt =
                             Arrays.stream(source.getClass().getMethods())
-                                    .filter(method -> method.getName().startsWith("get") ||
-                                            method.getName().startsWith("is"))
+                                    .filter(method -> method.getName().startsWith(METHOD_GET_PREFIX) ||
+                                            method.getName().startsWith(METHOD_IS_PREFIX))
                                     .filter(
                                             method -> method.getName()
                                                     .endsWith(StringUtils.capitalize(field.getName())) ||
@@ -82,11 +86,11 @@ public class ModelMapper implements ModelMapperI {
         final var setters = Arrays.stream(destinationObj.getClass().getDeclaredFields())
                 .map(field -> {
                     final var methodOpt = Arrays.stream(destinationObj.getClass().getMethods())
-                            .filter(method -> method.getName().startsWith("set"))
+                            .filter(method -> method.getName().startsWith(METHOD_SET_PREFIX))
                             .filter(
                                     method -> method.getName()
                                             .endsWith(StringUtils.capitalize(field.getName())) ||
-                                            (field.getName().startsWith("is") &&
+                                            (field.getName().startsWith(METHOD_IS_PREFIX) &&
                                                     method.getName()
                                                             .endsWith(field.getName().substring(2))
                                             )
@@ -108,8 +112,8 @@ public class ModelMapper implements ModelMapperI {
 
         setters.forEach(setter -> {
 
-
             // Multimap many to one
+            // todo refactor into smaller parts
             if (setter.getKey().isAnnotationPresent(MapValues.class)) {
 
                 final var mapValuesAnnotation = setter.getKey().getAnnotation(MapValues.class);
@@ -150,6 +154,8 @@ public class ModelMapper implements ModelMapperI {
                 return;
             }
 
+            // Map one to one
+            // todo refactor into smaller parts
             final var setterFieldName = getFieldName(setter.getKey());
 
             getters.stream().filter(getter -> getter.getKey().getName().equals(setterFieldName))
@@ -182,18 +188,18 @@ public class ModelMapper implements ModelMapperI {
 
     private ValueMapper getSingleValueMapper(final Field field)
             throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        // TODO DI container
-        final var valueMapperClass = field.isAnnotationPresent(MapValue.class) ?
+
+        final Class<? extends ValueMapper> valueMapperClass = field.isAnnotationPresent(MapValue.class) ?
                 field.getAnnotation(MapValue.class).valueMapper() : DefaultValueMapper.class;
 
-        return (ValueMapper) valueMapperClass.getConstructor().newInstance();
+        return ValueMapperContainer.getInstance().getValueMapperInstance(valueMapperClass);
     }
 
     private MultiValueMapper getMultiValueMapper(final Field field)
             throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        // TODO DI container
+
         final var valueMapperClass = field.getAnnotation(MapValues.class).multiValueMapper();
-        return (MultiValueMapper) valueMapperClass.getConstructor().newInstance();
+        return MultiValueMapperContainer.getInstance().getValueMapperInstance(valueMapperClass);
     }
 
     private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType)
@@ -321,21 +327,9 @@ public class ModelMapper implements ModelMapperI {
     private void mapFieldValues(final Object destinationObj, final Field field, final Set<FromField> fromFieldSet)
             throws Exception {
 
-        final Object value;
-
-        final MapValues mapValues = field.getAnnotation(MapValues.class);
-
-        if (Objects.nonNull(mapValues)) {
-
-            // TODO make singleton?
-            final MultiValueMapper
-                    objectValueMapper =
-                    (MultiValueMapper) mapValues.multiValueMapper().getConstructor().newInstance();
-
-            value = objectValueMapper.mapToValue(fromFieldSet);
-        } else {
-            value = null;
-        }
+        final var value = field.isAnnotationPresent(MapValues.class) ?
+                getMultiValueMapper(field).mapToValue(fromFieldSet) :
+                null;
 
         boolean isPrivate = setFieldPublic(field, destinationObj);
 
