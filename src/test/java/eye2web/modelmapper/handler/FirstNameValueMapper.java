@@ -1,15 +1,15 @@
 package eye2web.modelmapper.handler;
 
-import eye2web.modelmapper.model.MapFromField;
+import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.ValueMapper;
 
 public class FirstNameValueMapper implements ValueMapper {
     @Override
-    public Object mapToValue(final MapFromField<?> mapFromField) {
+    public Object mapToValue(final FromField fromField) {
 
-        if (mapFromField.containsValue())
-            System.out.println(mapFromField.getType());
+        if (fromField.containsValue())
+            System.out.println(fromField.getType());
 
-        return mapFromField.getFieldValue();
+        return fromField.getFieldValue();
     }
 }

@@ -3,7 +3,7 @@ package eye2web.modelmapper;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.exception.NoArgsConstructorException;
-import eye2web.modelmapper.model.MapFromField;
+import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.MultiValueMapper;
 import eye2web.modelmapper.value.map.ValueMapper;
@@ -107,14 +107,70 @@ public class ModelMapper implements ModelMapperI {
 
 
         setters.forEach(setter -> {
-            getters.stream().filter(getter -> getter.getKey().getName().equals(setter.getKey().getName()))
+
+
+            // Multimap many to one
+            if (setter.getKey().isAnnotationPresent(MapValues.class)) {
+
+                final var mapValuesAnnotation = setter.getKey().getAnnotation(MapValues.class);
+
+                //
+                final Set<FromField> fieldValues = getters.stream().filter(getter -> Arrays.stream(mapValuesAnnotation.fieldNames())
+                        .anyMatch(setterFieldName -> setterFieldName.equals(getter.getKey().getName())))
+                        .map(getter -> {
+
+                            try {
+                                final var value = getter.getValue().invoke(source);
+
+                                return FromField.builder()
+                                        .fieldValue(value)
+                                        .fieldName(getter.getKey().getName())
+                                        .build();
+                            } catch (Exception ex) {
+                                System.out.println(
+                                        ex.getMessage()
+                                );
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+
+
+                try {
+                    final var multiValueMapper = getMultiValueMapper(setter.getKey());
+                    setter.getValue().invoke(destination, multiValueMapper.mapToValue(fieldValues));
+
+                } catch (Exception ex) {
+                    System.out.println(
+                            ex.getMessage()
+                    );
+                }
+
+                return;
+            }
+
+            final var setterFieldName = getFieldName(setter.getKey());
+
+            getters.stream().filter(getter -> getter.getKey().getName().equals(setterFieldName))
                     .findAny()
                     .ifPresent(getter -> {
 
                         try {
                             final var value = getter.getValue().invoke(source);
-                            setter.getValue().invoke(destination, value);
 
+                            if (!shouldIgnoreFieldValue(setter.getKey().getAnnotation(MapValue.class), value)) {
+
+                                final var
+                                        objectValueMapper = getSingleValueMapper(setter.getKey());
+
+                                final var mapFromField = FromField.builder()
+                                        .fieldValue(value)
+                                        .fieldName(getter.getKey().getName())
+                                        .build();
+
+                                setter.getValue().invoke(destination, objectValueMapper.mapToValue(mapFromField));
+                            }
                         } catch (Exception ex) {
                             System.out.println(
                                     ex.getMessage()
@@ -122,6 +178,22 @@ public class ModelMapper implements ModelMapperI {
                         }
                     });
         });
+    }
+
+    private ValueMapper getSingleValueMapper(final Field field)
+            throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        // TODO DI container
+        final var valueMapperClass = field.isAnnotationPresent(MapValue.class) ?
+                field.getAnnotation(MapValue.class).valueMapper() : DefaultValueMapper.class;
+
+        return (ValueMapper) valueMapperClass.getConstructor().newInstance();
+    }
+
+    private MultiValueMapper getMultiValueMapper(final Field field)
+            throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        // TODO DI container
+        final var valueMapperClass = field.getAnnotation(MapValues.class).multiValueMapper();
+        return (MultiValueMapper) valueMapperClass.getConstructor().newInstance();
     }
 
     private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType)
@@ -143,23 +215,23 @@ public class ModelMapper implements ModelMapperI {
             return;
         }
 
-        final Set<MapFromField<?>> mapFromFieldsSet = sourceFieldValues.stream()
+        final Set<FromField> fromFieldsSet = sourceFieldValues.stream()
                 .filter(s ->
                         Arrays.stream(multiValueFieldNames).anyMatch(mv -> mv.equals(s.getKey()))
                 ).map((sourceField) ->
 
-                        MapFromField.builder()
+                        FromField.builder()
                                 .fieldName(sourceField.getKey())
                                 .fieldValue(sourceField.getValue())
                                 .build()
                 ).collect(Collectors.toCollection(LinkedHashSet::new));
 
-        for (final var t : mapFromFieldsSet) {
+        for (final var t : fromFieldsSet) {
             System.out.println(t.getFieldValue());
         }
 
-        if (mapFromFieldsSet.size() == multiValueFieldNames.length) {
-            mapFieldValues(destinationObj, field, mapFromFieldsSet);
+        if (fromFieldsSet.size() == multiValueFieldNames.length) {
+            mapFieldValues(destinationObj, field, fromFieldsSet);
         }
     }
 
@@ -222,23 +294,14 @@ public class ModelMapper implements ModelMapperI {
             return;
         }
 
-        final var mapFromField = MapFromField.builder()
+        final var mapFromField = FromField.builder()
                 .fieldName(fieldName)
                 .fieldValue(fieldValue)
                 .build();
 
-        if (Objects.nonNull(mapValue) &&
-                !mapValue.valueMapper().equals(DefaultValueMapper.class)) {
+        final var objectValueMapper = getSingleValueMapper(field);
 
-            // TODO make singleton? // DI Container
-            final ValueMapper
-                    objectValueMapper =
-                    (ValueMapper) mapValue.valueMapper().getConstructor().newInstance();
-
-            value = objectValueMapper.mapToValue(mapFromField);
-        } else {
-            value = defaultHandlerMapper.mapToValue(mapFromField);
-        }
+        value = objectValueMapper.mapToValue(mapFromField);
 
         boolean isPrivate = setFieldPublic(field, destinationObj);
 
@@ -255,7 +318,7 @@ public class ModelMapper implements ModelMapperI {
                 Objects.isNull(fieldValue));
     }
 
-    private void mapFieldValues(final Object destinationObj, final Field field, final Set<MapFromField<?>> mapFromFieldSet)
+    private void mapFieldValues(final Object destinationObj, final Field field, final Set<FromField> fromFieldSet)
             throws Exception {
 
         final Object value;
@@ -269,7 +332,7 @@ public class ModelMapper implements ModelMapperI {
                     objectValueMapper =
                     (MultiValueMapper) mapValues.multiValueMapper().getConstructor().newInstance();
 
-            value = objectValueMapper.mapToValue(mapFromFieldSet);
+            value = objectValueMapper.mapToValue(fromFieldSet);
         } else {
             value = null;
         }

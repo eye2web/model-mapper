@@ -9,9 +9,9 @@ import java.util.Objects;
 @Builder
 @Getter
 @RequiredArgsConstructor
-public class MapFromField<D> {
+public class FromField {
     private final String fieldName;
-    private final D fieldValue;
+    private final Object fieldValue;
 
     public boolean containsValue() {
         return Objects.nonNull(fieldValue);
