@@ -4,8 +4,9 @@ import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.exception.NoArgsConstructorException;
 import eye2web.modelmapper.model.FromField;
+import eye2web.modelmapper.model.Options;
 import eye2web.modelmapper.value.map.*;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -15,8 +16,14 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ModelMapper implements ModelMapperI {
+
+    private final Options options;
+
+    public ModelMapper() {
+        options = Options.builder().build();
+    }
 
     @Override
     public <D> D map(final Object source, final Class<D> destinationType)
