@@ -7,16 +7,20 @@ import eye2web.modelmapper.strategy.MethodStrategy;
 import eye2web.modelmapper.strategy.Strategy;
 import eye2web.modelmapper.value.map.MultiValueMapperContainer;
 import eye2web.modelmapper.value.map.ValueMapperContainer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.lang.reflect.InvocationTargetException;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ModelMapper implements ModelMapperI {
 
     @NonNull
-    private final Options options;
+    @Getter
+    @Setter
+    private Options options;
 
     public ModelMapper() {
         options = Options.builder().build();

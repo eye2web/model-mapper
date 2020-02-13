@@ -1,6 +1,6 @@
 package eye2web.modelmapper;
 
-import eye2web.modelmapper.model.ModelARequest;
+import eye2web.modelmapper.model.ModelA;
 import eye2web.modelmapper.model.ModelAResponse;
 import eye2web.modelmapper.model.SimpleNestedModel;
 import org.junit.Assert;
@@ -24,7 +24,7 @@ public class ModelMapperTest {
     @Test
     public void shouldFullyMapModelAResponseToRequest() throws Exception {
 
-        final ModelARequest modelARequest = ModelARequest.builder()
+        final ModelA modelA = ModelA.builder()
                 .id(1)
                 .isActive(true)
                 .valid(true)
@@ -36,7 +36,7 @@ public class ModelMapperTest {
                         .build())
                 .build();
 
-        final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
+        final ModelAResponse modelAResponse = modelMapper.map(modelA, ModelAResponse.class);
 
         Assert.assertEquals(1, modelAResponse.getId());
         Assert.assertTrue(modelAResponse.isActive());
@@ -51,12 +51,12 @@ public class ModelMapperTest {
     @Test
     public void shouldNotMapEmptyFirstName() throws Exception {
 
-        final ModelARequest modelARequest = ModelARequest.builder()
+        final ModelA modelA = ModelA.builder()
                 .lastName("van der Heijden")
                 .birthday(LocalDate.of(1990, 3, 14))
                 .build();
 
-        final ModelAResponse modelAResponse = modelMapper.map(modelARequest, ModelAResponse.class);
+        final ModelAResponse modelAResponse = modelMapper.map(modelA, ModelAResponse.class);
 
         Assert.assertNull(modelAResponse.getFirstName());
         Assert.assertEquals("van der Heijden", modelAResponse.getLName());
@@ -64,7 +64,7 @@ public class ModelMapperTest {
 
     @Test
     public void shouldMapToExistingTarget() throws Exception {
-        final ModelARequest modelARequest = ModelARequest.builder()
+        final ModelA modelA = ModelA.builder()
                 .id(1)
                 .firstName("Remco")
                 .lastName("van der Heijden")
@@ -76,7 +76,7 @@ public class ModelMapperTest {
                 .doesNotMap("burp")
                 .build();
 
-        modelMapper.map(modelARequest, modelAResponse);
+        modelMapper.map(modelA, modelAResponse);
 
         Assert.assertEquals(1, modelAResponse.getId());
         Assert.assertEquals("Remco", modelAResponse.getFirstName());
@@ -87,7 +87,7 @@ public class ModelMapperTest {
 
     @Test
     public void shouldMapToExistingTargetIgnoringNulls() throws Exception {
-        final ModelARequest modelARequest = ModelARequest.builder()
+        final ModelA modelA = ModelA.builder()
                 .id(1)
                 .firstName(null)
                 .lastName("van der Heijden")
@@ -100,7 +100,7 @@ public class ModelMapperTest {
                 .fName("Remco")
                 .build();
 
-        modelMapper.map(modelARequest, modelAResponse);
+        modelMapper.map(modelA, modelAResponse);
 
         Assert.assertEquals(1, modelAResponse.getId());
         Assert.assertNull(modelAResponse.getFirstName());

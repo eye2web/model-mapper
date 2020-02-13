@@ -1,15 +1,14 @@
 package eye2web.modelmapper.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
 @Builder
 @Getter
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class FromField {
+    @NonNull
     private final String fieldName;
     private final Object fieldValue;
 

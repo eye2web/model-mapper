@@ -1,6 +1,6 @@
 package eye2web.modelmapper.annotations;
 
-import eye2web.modelmapper.FieldProperties;
+import eye2web.modelmapper.model.FieldProperties;
 import eye2web.modelmapper.value.map.DefaultValueMapper;
 import eye2web.modelmapper.value.map.ValueMapper;
 

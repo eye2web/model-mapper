@@ -35,6 +35,7 @@ public class MethodStrategy implements Strategy {
         final var METHOD_IS_PREFIX = "is";
 
         // Map fields to corresponding getter methods
+        // todo refactor into smaller parts
         final var getters = Arrays.stream(source.getClass().getDeclaredFields())
                 .map(field -> {
                     final var methodOpt =
@@ -53,6 +54,7 @@ public class MethodStrategy implements Strategy {
                 .collect(Collectors.toList());
 
         // Map fields to corresponding setter methods
+        // todo refactor into smaller parts
         final var setters = Arrays.stream(destinationObj.getClass().getDeclaredFields())
                 .map(field -> {
                     final var methodOpt = Arrays.stream(destinationObj.getClass().getMethods())

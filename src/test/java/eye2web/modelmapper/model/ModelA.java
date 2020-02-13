@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-public class ModelARequest {
+public class ModelA {
 
     private int id;
 
