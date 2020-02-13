@@ -11,6 +11,6 @@ import lombok.Getter;
 public class Options {
 
     @Builder.Default
-    private final InjectionMode injectionMode = InjectionMode.Method;
+    private final InjectionStrategy injectionStrategy = InjectionStrategy.Method;
 
 }

@@ -1,5 +1,5 @@
 package eye2web.modelmapper.model;
 
-public enum InjectionMode {
+public enum InjectionStrategy {
     Method, Field
 }

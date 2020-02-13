@@ -4,9 +4,9 @@ import eye2web.modelmapper.model.ModelARequest;
 import eye2web.modelmapper.model.ModelAResponse;
 import eye2web.modelmapper.model.SimpleNestedModel;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
@@ -14,8 +14,12 @@ import java.time.LocalDate;
 @RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
 
-    @InjectMocks
     private ModelMapper modelMapper;
+
+    @Before
+    public void setup() {
+        modelMapper = new ModelMapper();
+    }
 
     @Test
     public void shouldFullyMapModelAResponseToRequest() throws Exception {
