@@ -10,19 +10,13 @@ public class ConcatMultiValueMapper implements MultiValueMapper {
     @Override
     public Object mapToValue(final Set<FromField> fromFieldSet) {
 
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        for (final var mapFrom : fromFieldSet) {
-
-            if (mapFrom.containsValue())
-                System.out.println(mapFrom.getType());
-
-            stringBuilder.append(mapFrom.getFieldValue());
-            stringBuilder.append(" ");
-        }
-
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        return stringBuilder.toString();
+        return fromFieldSet.stream()
+                .filter(FromField::containsValue)
+                .filter(field -> field.getType().equals(String.class))
+                .map(field -> (String) field.getFieldValue())
+                .reduce((partial, value) ->
+                        partial + " " + value
+                ).get();
     }
 
 }
