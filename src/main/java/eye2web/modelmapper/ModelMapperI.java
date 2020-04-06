@@ -4,7 +4,7 @@ public interface ModelMapperI {
 
     /**
      * Map object to new instance of destination type
-     *
+     * @param <D>             ClassType definition
      * @param source          Source where data should be copied from
      * @param destinationType Type of class used to map source data to.
      * @return returns a instance of destinationType including the copied data from source.
@@ -15,7 +15,7 @@ public interface ModelMapperI {
 
     /**
      * Map object to existing instance
-     *
+     * @param <D>             ClassType definition
      * @param source         Source where data should be copied from
      * @param destinationObj Destination object.
      * @throws Exception mapping error.

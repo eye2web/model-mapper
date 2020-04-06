@@ -1,21 +1,27 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+    }
+}
+
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 ext {
     lombokVersion = '1.18.10'
     manifoldVersion = '2019.1.32'
-
-    sonatypeUsername = ''
-    sonatypePassword = ''
     groupName = 'com.github.eye2web'
     artifactIdentifier = 'model-mapper'
-    projectVersion = '1.0.0'
+    projectVersion = '2.0.0-SNAPSHOT'
 }
-
 
 group groupName
 version projectVersion
+archivesBaseName = artifactIdentifier
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -25,12 +31,12 @@ repositories {
 }
 
 apply plugin: 'java-library'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
 apply plugin: 'signing'
 
 dependencies {
     implementation 'systems.manifold:manifold-ext:2019.1.32',
-            "org.projectlombok:lombok:$lombokVersion",\
+            "org.projectlombok:lombok:$lombokVersion",
             'org.apache.commons:commons-lang3:3.9'
 
     testCompile 'junit:junit:4.12',
@@ -56,46 +62,58 @@ test {
     testLogging.showStandardStreams = true
 }
 
-task sourceJar(type: Jar) {
-    classifier "sources"
-    from sourceSets.main.allJava
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
-    from javadoc.destinationDir
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 artifacts {
-    archives jar
-    archives sourceJar
-    archives javadocJar
+    archives javadocJar, sourcesJar
 }
-
-signing {
-    sign configurations.archives
-}
-
 
 wrapper {
     gradleVersion = '6.0.1'
 }
 
-publishing {
 
-    publications {
-        mavenJava(MavenPublication) {
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            pom {
-                name = 'Modelmapper'
-                description = 'Map DTO and model objects using advanced options'
-                url = 'https://github.com/eye2web/model-mapper'
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Modelmapper'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Map DTO and model objects using advanced options'
+                url 'https://github.com/eye2web/model-mapper'
+
+                scm {
+                    connection 'scm:svn:http://foo.googlecode.com/svn/trunk/'
+                    developerConnection 'scm:svn:https://foo.googlecode.com/svn/trunk/'
+                    url 'http://foo.googlecode.com/svn/trunk/'
+                }
+
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
                         url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
+
                 developers {
                     developer {
                         id = 'Eye2web'
@@ -103,65 +121,13 @@ publishing {
                         email = 'remcovanderheijden@hotmail.com'
                     }
                 }
-                scm {
-                    connection = 'scm:git:git://github.com/eye2web/model-mapper.git'
-                    developerConnection = 'scm:git:ssh://github.com/eye2web/model-mapper.git'
-                    url = 'https://github.com/eye2web/model-mapper'
-                }
-            }
-
-            groupId groupName
-            artifactId artifactIdentifier
-            version projectVersion
-
-            from components.java
-
-            // create the sign pom artifact
-            pom.withXml {
-                def pomFile = file("${project.buildDir}/generated-pom.xml")
-                writeTo(pomFile)
-                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
-                artifact(pomAscFile) {
-                    classifier = null
-                    extension = 'pom.asc'
-                }
-            }
-
-            artifact(sourceJar) {
-                classifier = 'sources'
-            }
-            artifact(javadocJar) {
-                classifier = 'javadoc'
-            }
-
-            // create the signed artifacts
-            project.tasks.signArchives.signatureFiles.each {
-                artifact(it) {
-                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
-                    if (matcher.find()) {
-                        classifier = matcher.group(1)
-                    } else {
-                        classifier = null
-                    }
-                    extension = 'jar.asc'
-                }
-            }
-
-        }
-    }
-    repositories {
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-            credentials {
-                username sonatypeUsername
-                password sonatypePassword
             }
         }
     }
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign configurations.archives
 }
 
 javadoc {
