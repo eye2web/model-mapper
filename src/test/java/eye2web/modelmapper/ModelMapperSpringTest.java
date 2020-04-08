@@ -27,15 +27,15 @@ public class ModelMapperSpringTest {
                 .groupName("test")
                 .build();
 
-        final var result = modelMapper.map(articleGroupRequest, ArticleGroup.class);
+        final var articleGroup = modelMapper.map(articleGroupRequest, ArticleGroup.class);
 
-        Assert.assertEquals("test", result.getGroupName());
-        Assert.assertTrue(Objects.nonNull(result.getArticles()));
-        Assert.assertEquals(2, result.getArticles().size());
-        Assert.assertEquals(1, result.getArticles().get(0).getId());
-        Assert.assertEquals("Test article 1", result.getArticles().get(0).getName());
-        Assert.assertEquals(2, result.getArticles().get(1).getId());
-        Assert.assertEquals("Test article 2", result.getArticles().get(1).getName());
+        Assert.assertEquals("test", articleGroup.getGroupName());
+        Assert.assertTrue(Objects.nonNull(articleGroup.getArticles()));
+        Assert.assertEquals(2, articleGroup.getArticles().size());
+        Assert.assertEquals(1, articleGroup.getArticles().get(0).getId());
+        Assert.assertEquals("Test article 1", articleGroup.getArticles().get(0).getName());
+        Assert.assertEquals(2, articleGroup.getArticles().get(1).getId());
+        Assert.assertEquals("Test article 2", articleGroup.getArticles().get(1).getName());
     }
 
 }
