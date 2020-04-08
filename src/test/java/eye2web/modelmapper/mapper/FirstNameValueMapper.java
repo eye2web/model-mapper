@@ -1,4 +1,4 @@
-package eye2web.modelmapper.handler;
+package eye2web.modelmapper.mapper;
 
 import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.ValueMapper;

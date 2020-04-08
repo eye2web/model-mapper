@@ -1,9 +1,12 @@
 # model-mapper
 Easy to use annotation based model mapper with advanced capabilities.
 
-## Highlights
+## Highlights 2.1.0
+- Now supports Spring boot managed ValueMapper ans MultiValueMapper beans! (check tests for examples)
+
+## Highlights 2.0.0
 - Supports field and setter method injection. (Method setter injection is the default)
-- Support for lombok setters when using the method injection strategy (default).
+- Supports lombok setters when using the method injection strategy (default).
 - Create your own value and multi value mapper classes for advanced usage.
 - Map and combine multiple values into one.
 - Map values to existing instances.

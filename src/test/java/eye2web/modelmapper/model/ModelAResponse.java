@@ -2,9 +2,9 @@ package eye2web.modelmapper.model;
 
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
-import eye2web.modelmapper.handler.AgeValueMapper;
-import eye2web.modelmapper.handler.ConcatMultiValueMapper;
-import eye2web.modelmapper.handler.FirstNameValueMapper;
+import eye2web.modelmapper.mapper.AgeValueMapper;
+import eye2web.modelmapper.mapper.ConcatMultiValueMapper;
+import eye2web.modelmapper.mapper.FirstNameValueMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

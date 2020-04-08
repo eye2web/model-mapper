@@ -1,4 +1,4 @@
-package eye2web.modelmapper.handler;
+package eye2web.modelmapper.mapper;
 
 import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.ValueMapper;
@@ -11,14 +11,13 @@ public class AgeValueMapper implements ValueMapper {
     @Override
     public Object mapToValue(final FromField fromField) {
 
-        if (fromField.containsValue())
-            System.out.println(fromField.getType());
+        if (!fromField.containsValue())
+            return 0;
 
         final var birthDate = (LocalDate) fromField.getFieldValue();
+        final var currentDate = LocalDate.now();
 
-        final var currentTestDate = LocalDate.ofYearDay(2020, 1);
-
-        return Period.between(birthDate, currentTestDate).getYears();
+        return Period.between(birthDate, currentDate).getYears();
     }
 
 }

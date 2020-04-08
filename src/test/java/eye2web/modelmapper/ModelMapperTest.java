@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
@@ -24,6 +25,8 @@ public class ModelMapperTest {
     @Test
     public void shouldFullyMapModelAResponseToRequest() throws Exception {
 
+        final var age = Period.between(LocalDate.of(1990, 3, 14), LocalDate.now()).getYears();
+        
         final ModelA modelA = ModelA.builder()
                 .id(1)
                 .isActive(true)
@@ -45,7 +48,7 @@ public class ModelMapperTest {
         Assert.assertEquals("van der Heijden", modelAResponse.getLName());
         Assert.assertEquals("Remco van der Heijden", modelAResponse.getFullName());
         Assert.assertEquals("nested name", modelAResponse.getSimpleNestedModel().getNestedModelName());
-        Assert.assertEquals(29, modelAResponse.getAge());
+        Assert.assertEquals(age, modelAResponse.getAge());
     }
 
     @Test
