@@ -16,7 +16,7 @@ This library is available on mvn central.
 
 Gradle
 ```groovy
-implementation 'com.github.eye2web:model-mapper:2.0.0'
+implementation 'com.github.eye2web:model-mapper:2.1.0'
 ```
 
 Maven
@@ -30,6 +30,8 @@ Maven
 
 Fields with the same name and type will be mapped by default.
 For advanced use, the following field annotations can be used.
+
+Examples can be found in src/main/test.
 
 ```java
 @MapValue(fieldName = "firstName")
