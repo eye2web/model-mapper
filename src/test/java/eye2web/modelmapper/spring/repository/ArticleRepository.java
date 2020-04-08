@@ -12,16 +12,18 @@ public class ArticleRepository {
     public List<Article> getAllArticlesByGroupId(final int groupId) {
 
         final var articles = new ArrayList<Article>();
-        articles.add(Article.builder()
-                .id(1)
-                .name("Test article 1")
-                .build());
 
-        articles.add(Article.builder()
-                .id(2)
-                .name("Test article 2")
-                .build());
+        if (groupId == 1) {
+            articles.add(Article.builder()
+                    .id(1)
+                    .name("Test article 1")
+                    .build());
 
+            articles.add(Article.builder()
+                    .id(2)
+                    .name("Test article 2")
+                    .build());
+        }
         return articles;
     }
 
