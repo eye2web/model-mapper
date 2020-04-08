@@ -23,16 +23,19 @@ public class ModelMapperSpringTest {
     public void shouldMapArticleIdToArticleObject() throws Exception {
 
         final var articleGroupRequest = ArticleGroupRequest.builder()
-                .id(1)
+                .groupId(1)
                 .groupName("test")
                 .build();
 
         final var result = modelMapper.map(articleGroupRequest, ArticleGroup.class);
 
-        Assert.assertTrue(Objects.nonNull(result.getArticle()));
         Assert.assertEquals("test", result.getGroupName());
-        Assert.assertEquals(1, result.getArticle().getId());
-        Assert.assertEquals("Test article", result.getArticle().getName());
+        Assert.assertTrue(Objects.nonNull(result.getArticles()));
+        Assert.assertEquals(2, result.getArticles().size());
+        Assert.assertEquals(1, result.getArticles().get(0).getId());
+        Assert.assertEquals("Test article 1", result.getArticles().get(0).getName());
+        Assert.assertEquals(2, result.getArticles().get(1).getId());
+        Assert.assertEquals("Test article 2", result.getArticles().get(1).getName());
     }
 
 }

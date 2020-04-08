@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @Builder
 public class ArticleGroupRequest {
 
-    private final int id;
+    private final int groupId;
 
     private final String groupName;
 }

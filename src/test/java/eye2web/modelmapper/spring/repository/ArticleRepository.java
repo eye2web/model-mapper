@@ -3,21 +3,26 @@ package eye2web.modelmapper.spring.repository;
 import eye2web.modelmapper.spring.model.Article;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class ArticleRepository {
 
-    public Optional<Article> getArticleById(final int id) {
+    public List<Article> getAllArticlesByGroupId(final int groupId) {
 
-        if (id == 1) {
-            return Optional.of(Article.builder()
-                    .id(1)
-                    .name("Test article")
-                    .build());
-        }
+        final var articles = new ArrayList<Article>();
+        articles.add(Article.builder()
+                .id(1)
+                .name("Test article 1")
+                .build());
 
-        return Optional.empty();
+        articles.add(Article.builder()
+                .id(2)
+                .name("Test article 2")
+                .build());
+
+        return articles;
     }
 
 }

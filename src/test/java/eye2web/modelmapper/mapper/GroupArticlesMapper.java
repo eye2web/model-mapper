@@ -8,15 +8,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class ArticleMapper implements ValueMapper {
+public class GroupArticlesMapper implements ValueMapper {
 
     private final ArticleRepository articleRepository;
 
     @Override
-    public Object mapToValue(FromField fromField) {
+    public Object mapToValue(final FromField fromField) {
 
-        final var articleOpt = articleRepository.getArticleById((int) fromField.getFieldValue());
-
-        return articleOpt.orElse(null);
+        return articleRepository.getAllArticlesByGroupId((int) fromField.getFieldValue());
     }
 }
