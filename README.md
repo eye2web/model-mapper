@@ -2,7 +2,7 @@
 Easy to use annotation based model mapper with advanced capabilities.
 
 ## Highlights 2.1.0
-- Now supports Spring boot managed ValueMapper ans MultiValueMapper beans! (check tests for examples)
+- Now supports Spring boot managed ValueMapper and MultiValueMapper beans! (check tests for examples)
 
 ## Highlights 2.0.0
 - Supports field and setter method injection. (Method setter injection is the default)
