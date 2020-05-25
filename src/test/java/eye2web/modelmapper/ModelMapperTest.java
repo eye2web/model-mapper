@@ -11,6 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModelMapperTest {
@@ -26,11 +27,18 @@ public class ModelMapperTest {
     public void shouldFullyMapModelAResponseToRequest() throws Exception {
 
         final var age = Period.between(LocalDate.of(1990, 3, 14), LocalDate.now()).getYears();
-        
+
+        final var names = new ArrayList<String>();
+
+        names.add("piet");
+        names.add("jan");
+        names.add("henk");
+
         final ModelA modelA = ModelA.builder()
                 .id(1)
                 .isActive(true)
                 .valid(true)
+                .names(names)
                 .firstName("Remco")
                 .lastName("van der Heijden")
                 .birthday(LocalDate.of(1990, 3, 14))
@@ -42,6 +50,7 @@ public class ModelMapperTest {
         final ModelAResponse modelAResponse = modelMapper.map(modelA, ModelAResponse.class);
 
         Assert.assertEquals(1, modelAResponse.getId());
+        Assert.assertEquals(3, modelAResponse.getUpperCaseNames().size());
         Assert.assertTrue(modelAResponse.isActive());
         Assert.assertTrue(modelAResponse.isValid());
         Assert.assertEquals("Remco", modelAResponse.getFirstName());

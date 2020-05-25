@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,6 +20,8 @@ public class ModelA {
     private boolean isActive;
 
     private boolean valid;
+
+    private List<String> names;
 
     private SimpleNestedModel simpleNestedModel;
 }

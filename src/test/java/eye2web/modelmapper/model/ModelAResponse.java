@@ -5,10 +5,13 @@ import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.mapper.AgeValueMapper;
 import eye2web.modelmapper.mapper.ConcatMultiValueMapper;
 import eye2web.modelmapper.mapper.FirstNameValueMapper;
+import eye2web.modelmapper.mapper.UpperCaseValueMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -42,4 +45,7 @@ public class ModelAResponse {
 
     @MapValue(fieldName = "birthday", valueMapper = AgeValueMapper.class)
     private int age;
+    
+    @MapValue(fieldName = "names", valueMapper = UpperCaseValueMapper.class, iterate = true)
+    private List<String> upperCaseNames;
 }

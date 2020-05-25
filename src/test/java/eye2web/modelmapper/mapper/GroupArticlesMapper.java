@@ -1,5 +1,6 @@
 package eye2web.modelmapper.mapper;
 
+import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.spring.repository.ArticleRepository;
 import eye2web.modelmapper.value.map.ValueMapper;
@@ -13,7 +14,7 @@ public class GroupArticlesMapper implements ValueMapper {
     private final ArticleRepository articleRepository;
 
     @Override
-    public Object mapToValue(final FromField fromField) {
+    public Object mapToValue(final FromField fromField, final ModelMapperI modelMapper) {
 
         return articleRepository.getAllArticlesByGroupId((int) fromField.getFieldValue());
     }

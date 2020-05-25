@@ -48,7 +48,7 @@ public class ModelMapper implements ModelMapperI {
 
         final D destinationObj = destinationType.cast(createEmptyInstanceOfNoArgsClass(destinationType));
 
-        getCurrentStrategy().mapObjects(source, destinationObj);
+        getCurrentStrategy().mapObjects(source, destinationObj, this);
 
         return destinationObj;
     }
@@ -56,7 +56,7 @@ public class ModelMapper implements ModelMapperI {
     @Override
     public <D> void map(final Object source, final D destinationObj)
             throws Exception {
-        getCurrentStrategy().mapObjects(source, destinationObj);
+        getCurrentStrategy().mapObjects(source, destinationObj, this);
     }
 
     @Override

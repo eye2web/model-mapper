@@ -1,5 +1,6 @@
 package eye2web.modelmapper.strategy;
 
+import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.model.FromField;
@@ -23,9 +24,9 @@ public class FieldStrategy implements Strategy {
 
         return strategy;
     }
-    
+
     @Override
-    public void mapObjects(Object source, Object destinationObj) throws Exception {
+    public void mapObjects(final Object source, final Object destinationObj, final ModelMapperI modelMapper) throws Exception {
         final List<Map.Entry<String, Object>> sourceFieldValues = StrategyUtil.getFieldValues(source);
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
@@ -33,7 +34,7 @@ public class FieldStrategy implements Strategy {
             if (Objects.nonNull(field.getAnnotation(MapValues.class))) {
                 tryMapMultiValueField(field, sourceFieldValues, destinationObj);
             } else {
-                tryMapSingleValueField(field, sourceFieldValues, destinationObj);
+                tryMapSingleValueField(field, sourceFieldValues, destinationObj, modelMapper);
             }
         }
     }
@@ -69,7 +70,8 @@ public class FieldStrategy implements Strategy {
 
 
     private void tryMapSingleValueField(final Field field, final List<Map.Entry<String, Object>> sourceFieldValues,
-                                        final Object destinationObj) throws Exception {
+                                        final Object destinationObj,
+                                        ModelMapperI modelMapper) throws Exception {
 
         final String fieldName = StrategyUtil.getFieldName(field);
 
@@ -78,13 +80,14 @@ public class FieldStrategy implements Strategy {
                 .findFirst();
 
         if (vOpt.isPresent()) {
-            mapFieldValue(destinationObj, field, fieldName, vOpt.get().getValue());
+            mapFieldValue(destinationObj, field, fieldName, vOpt.get().getValue(), modelMapper);
         }
     }
 
 
     private void mapFieldValue(final Object destinationObj, final Field field, final String fieldName,
-                               final Object fieldValue)
+                               final Object fieldValue,
+                               final ModelMapperI modelMapper)
             throws Exception {
 
         final Object value;
@@ -95,14 +98,22 @@ public class FieldStrategy implements Strategy {
             return;
         }
 
-        final var mapFromField = FromField.builder()
-                .fieldName(fieldName)
-                .fieldValue(fieldValue)
-                .build();
-
         final var objectValueMapper = StrategyUtil.getSingleValueMapper(field);
 
-        value = objectValueMapper.mapToValue(mapFromField);
+        if (Objects.isNull(mapValue)) {
+            value = fieldValue;
+        } else if (mapValue.iterate()) {
+            value = StrategyUtil.iterateElements(fieldValue, fieldName, objectValueMapper, modelMapper);
+
+        } else {
+            final var mapFromField = FromField.builder()
+                    .fieldName(fieldName)
+                    .fieldValue(fieldValue)
+                    .build();
+
+            value = objectValueMapper.mapToValue(mapFromField, modelMapper);
+        }
+
 
         boolean isPrivate = StrategyUtil.setFieldPublic(field, destinationObj);
 
@@ -112,7 +123,6 @@ public class FieldStrategy implements Strategy {
             field.setAccessible(false);
         }
     }
-
 
     private void mapFieldValues(final Object destinationObj, final Field field, final Set<FromField> fromFieldSet)
             throws Exception {

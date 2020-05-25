@@ -1,8 +1,10 @@
 package eye2web.modelmapper.strategy;
 
-import eye2web.modelmapper.model.FieldProperties;
+import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
+import eye2web.modelmapper.model.FieldProperties;
+import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.*;
 
 import java.lang.reflect.Field;
@@ -77,5 +79,25 @@ public class StrategyUtil {
         return didSetPublic;
     }
 
+    public static List<Object> iterateElements(final Object value,
+                                               final String fieldName,
+                                               final ValueMapper valueMapper,
+                                               final ModelMapperI modelMapper) {
+
+        final var results = new ArrayList<>();
+
+        for (Object val : (Iterable<Object>) value) {
+
+            final var mapFromField = FromField.builder()
+                    .fieldValue(val)
+                    .fieldName(fieldName)
+                    .isIterableItem(true)
+                    .build();
+
+            results.add(valueMapper.mapToValue(mapFromField, modelMapper));
+        }
+
+        return results;
+    }
 
 }

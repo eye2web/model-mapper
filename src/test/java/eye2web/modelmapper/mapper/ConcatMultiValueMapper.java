@@ -9,7 +9,7 @@ public class ConcatMultiValueMapper implements MultiValueMapper {
 
     @Override
     public Object mapToValue(final Set<FromField> fromFieldSet) {
-
+        
         return fromFieldSet.stream()
                 .filter(FromField::containsValue)
                 .filter(field -> field.getType().equals(String.class))

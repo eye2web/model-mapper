@@ -12,6 +12,9 @@ public class FromField {
     private final String fieldName;
     private final Object fieldValue;
 
+    @Builder.Default
+    private final boolean isIterableItem = false;
+
     public boolean containsValue() {
         return Objects.nonNull(fieldValue);
     }

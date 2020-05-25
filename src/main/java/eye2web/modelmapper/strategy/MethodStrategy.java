@@ -1,5 +1,6 @@
 package eye2web.modelmapper.strategy;
 
+import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
 import eye2web.modelmapper.model.FromField;
@@ -28,7 +29,7 @@ public class MethodStrategy implements Strategy {
     }
 
     @Override
-    public void mapObjects(Object source, Object destinationObj) {
+    public void mapObjects(final Object source, final Object destinationObj, final ModelMapperI modelMapper) {
 
         final var METHOD_GET_PREFIX = "get";
         final var METHOD_SET_PREFIX = "set";
@@ -73,13 +74,14 @@ public class MethodStrategy implements Strategy {
                 .map(Optional::get)
                 .collect(Collectors.toList());
 
-        mapGettersToSetters(source, getters, destinationObj, setters);
+        mapGettersToSetters(source, getters, destinationObj, setters, modelMapper);
     }
 
     private void mapGettersToSetters(final Object source,
                                      final List<Pair<Field, Method>> getters,
                                      final Object destination,
-                                     final List<Pair<Field, Method>> setters) {
+                                     final List<Pair<Field, Method>> setters,
+                                     final ModelMapperI modelMapper) {
         setters.forEach(setter -> {
 
             // Multimap many to one
@@ -135,17 +137,36 @@ public class MethodStrategy implements Strategy {
                         try {
                             final var value = getter.getValue().invoke(source);
 
-                            if (!StrategyUtil.shouldIgnoreFieldValue(setter.getKey().getAnnotation(MapValue.class), value)) {
+                            final var annotation = setter.getKey().getAnnotation(MapValue.class);
+
+                            if (Objects.isNull(annotation)) {
+                                // set field values without annotation
+                                setter.getValue().invoke(destination, value);
+                            } else if (!StrategyUtil.shouldIgnoreFieldValue(annotation, value)) {
+
+                                final Object resultValue;
 
                                 final var
                                         objectValueMapper = StrategyUtil.getSingleValueMapper(setter.getKey());
 
-                                final var mapFromField = FromField.builder()
-                                        .fieldValue(value)
-                                        .fieldName(getter.getKey().getName())
-                                        .build();
+                                // If iterable - value should be handled as iterable
+                                if (annotation.iterate()) {
+                                    resultValue = StrategyUtil.iterateElements(value,
+                                            getter.getKey().getName(),
+                                            objectValueMapper,
+                                            modelMapper);
 
-                                setter.getValue().invoke(destination, objectValueMapper.mapToValue(mapFromField));
+                                } else {
+                                    final var mapFromField = FromField.builder()
+                                            .fieldValue(value)
+                                            .fieldName(getter.getKey().getName())
+                                            .build();
+
+                                    resultValue = objectValueMapper.mapToValue(mapFromField, modelMapper);
+                                }
+
+                                // Set value
+                                setter.getValue().invoke(destination, resultValue);
                             }
                         } catch (Exception ex) {
                             System.out.println(
@@ -155,4 +176,5 @@ public class MethodStrategy implements Strategy {
                     });
         });
     }
+
 }

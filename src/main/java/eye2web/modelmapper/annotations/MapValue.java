@@ -15,5 +15,8 @@ public @interface MapValue {
 
     Class<? extends ValueMapper> valueMapper() default DefaultValueMapper.class;
 
+    // Currently only supports arrayList as return type
+    boolean iterate() default false;
+
     FieldProperties[] properties() default {};
 }
