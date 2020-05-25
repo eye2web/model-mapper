@@ -20,7 +20,7 @@ This library is available on mvn central.
 
 Gradle
 ```groovy
-implementation 'com.github.eye2web:model-mapper:2.1.0'
+implementation 'com.github.eye2web:model-mapper:2.2.0'
 ```
 
 Maven
