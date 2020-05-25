@@ -20,7 +20,7 @@ public class ModelMapperSpringTest {
 
 
     @Test
-    public void shouldMapArticleIdToArticleObject() throws Exception {
+    public void shouldMapArticleIdToArticleObject() {
 
         final var articleGroupRequest = ArticleGroupRequest.builder()
                 .groupId(1)

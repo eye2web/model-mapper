@@ -24,7 +24,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void shouldFullyMapModelAResponseToRequest() throws Exception {
+    public void shouldFullyMapModelAResponseToRequest() {
 
         final var age = Period.between(LocalDate.of(1990, 3, 14), LocalDate.now()).getYears();
 
@@ -61,7 +61,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void shouldNotMapEmptyFirstName() throws Exception {
+    public void shouldNotMapEmptyFirstName() {
 
         final ModelA modelA = ModelA.builder()
                 .lastName("van der Heijden")
@@ -75,7 +75,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void shouldMapToExistingTarget() throws Exception {
+    public void shouldMapToExistingTarget() {
         final ModelA modelA = ModelA.builder()
                 .id(1)
                 .firstName("Remco")
@@ -98,7 +98,7 @@ public class ModelMapperTest {
     }
 
     @Test
-    public void shouldMapToExistingTargetIgnoringNulls() throws Exception {
+    public void shouldMapToExistingTargetIgnoringNulls() {
         final ModelA modelA = ModelA.builder()
                 .id(1)
                 .firstName(null)

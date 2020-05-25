@@ -1,6 +1,6 @@
 package eye2web.modelmapper;
 
-import eye2web.modelmapper.exception.NoArgsConstructorException;
+import eye2web.modelmapper.exception.ModelMapperException;
 import eye2web.modelmapper.model.Options;
 import eye2web.modelmapper.strategy.FieldStrategy;
 import eye2web.modelmapper.strategy.MethodStrategy;
@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @AllArgsConstructor
@@ -43,8 +42,7 @@ public class ModelMapper implements ModelMapperI {
     }
 
     @Override
-    public <D> D map(final Object source, final Class<D> destinationType)
-            throws Exception {
+    public <D> D map(final Object source, final Class<D> destinationType) {
 
         final D destinationObj = destinationType.cast(createEmptyInstanceOfNoArgsClass(destinationType));
 
@@ -54,8 +52,7 @@ public class ModelMapper implements ModelMapperI {
     }
 
     @Override
-    public <D> void map(final Object source, final D destinationObj)
-            throws Exception {
+    public <D> void map(final Object source, final D destinationObj) {
         getCurrentStrategy().mapObjects(source, destinationObj, this);
     }
 
@@ -88,13 +85,12 @@ public class ModelMapper implements ModelMapperI {
         return strategy;
     }
 
-    private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType)
-            throws NoArgsConstructorException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    private Object createEmptyInstanceOfNoArgsClass(final Class<?> classType) {
         try {
             return classType.getConstructor()
                     .newInstance();
-        } catch (NoSuchMethodException ex) {
-            throw new NoArgsConstructorException(classType.getName());
+        } catch (final Exception ex) {
+            throw new ModelMapperException(ex);
         }
     }
 }

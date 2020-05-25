@@ -16,7 +16,7 @@ ext {
     lombokVersion = '1.18.10'
     groupName = 'com.github.eye2web'
     artifactIdentifier = 'model-mapper'
-    projectVersion = '2.2.0'
+    projectVersion = '2.2.1'
 }
 
 group groupName

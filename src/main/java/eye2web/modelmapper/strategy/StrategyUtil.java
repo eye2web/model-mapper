@@ -3,6 +3,7 @@ package eye2web.modelmapper.strategy;
 import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
+import eye2web.modelmapper.exception.ModelMapperException;
 import eye2web.modelmapper.model.FieldProperties;
 import eye2web.modelmapper.model.FromField;
 import eye2web.modelmapper.value.map.*;
@@ -23,7 +24,7 @@ public class StrategyUtil {
         return Objects.nonNull(mapValues) ? mapValues.fieldNames() : null;
     }
 
-    public static List<Map.Entry<String, Object>> getFieldValues(final Object obj) throws IllegalAccessException {
+    public static List<Map.Entry<String, Object>> getFieldValues(final Object obj) {
 
         final List<Map.Entry<String, Object>> fieldValues = new ArrayList<>();
 
@@ -32,9 +33,14 @@ public class StrategyUtil {
             boolean isPrivate = setFieldPublic(field, obj);
 
             final String name = getFieldName(field);
-            final Object value = field.get(obj);
 
-            fieldValues.add(new AbstractMap.SimpleEntry<>(name, value));
+            try {
+                final Object value = field.get(obj);
+                fieldValues.add(new AbstractMap.SimpleEntry<>(name, value));
+            } catch (final IllegalAccessException ex) {
+                throw new ModelMapperException(ex);
+            }
+            
             if (isPrivate) {
                 field.setAccessible(false);
             }

@@ -1,6 +1,9 @@
 # model-mapper
 Easy to use annotation based model mapper with advanced capabilities.
 
+## Highlights 2.2.1
+- ModelMapper now throws implicit exceptions
+
 ## Highlights 2.2.0
 - Now supports custom mapping of each element in a Iterable field.
 - Each ValueMapper class will now receive the ModelMapper Object to support mapping of nested Objects.
@@ -20,7 +23,7 @@ This library is available on mvn central.
 
 Gradle
 ```groovy
-implementation 'com.github.eye2web:model-mapper:2.2.0'
+implementation 'com.github.eye2web:model-mapper:2.2.1'
 ```
 
 Maven
@@ -28,7 +31,7 @@ Maven
 <dependency>
   <groupId>com.github.eye2web</groupId>
   <artifactId>model-mapper</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 ```
 

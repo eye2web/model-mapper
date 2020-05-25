@@ -3,6 +3,7 @@ package eye2web.modelmapper.strategy;
 import eye2web.modelmapper.ModelMapperI;
 import eye2web.modelmapper.annotations.MapValue;
 import eye2web.modelmapper.annotations.MapValues;
+import eye2web.modelmapper.exception.ModelMapperException;
 import eye2web.modelmapper.model.FromField;
 
 import java.lang.reflect.Field;
@@ -26,7 +27,7 @@ public class FieldStrategy implements Strategy {
     }
 
     @Override
-    public void mapObjects(final Object source, final Object destinationObj, final ModelMapperI modelMapper) throws Exception {
+    public void mapObjects(final Object source, final Object destinationObj, final ModelMapperI modelMapper) {
         final List<Map.Entry<String, Object>> sourceFieldValues = StrategyUtil.getFieldValues(source);
 
         for (final Field field : destinationObj.getClass().getDeclaredFields()) {
@@ -40,7 +41,7 @@ public class FieldStrategy implements Strategy {
     }
 
     private void tryMapMultiValueField(final Field field, final List<Map.Entry<String, Object>> sourceFieldValues,
-                                       final Object destinationObj) throws Exception {
+                                       final Object destinationObj) {
 
         final String[] multiValueFieldNames = StrategyUtil.getFieldNames(field);
 
@@ -71,7 +72,7 @@ public class FieldStrategy implements Strategy {
 
     private void tryMapSingleValueField(final Field field, final List<Map.Entry<String, Object>> sourceFieldValues,
                                         final Object destinationObj,
-                                        ModelMapperI modelMapper) throws Exception {
+                                        ModelMapperI modelMapper) {
 
         final String fieldName = StrategyUtil.getFieldName(field);
 
@@ -87,8 +88,7 @@ public class FieldStrategy implements Strategy {
 
     private void mapFieldValue(final Object destinationObj, final Field field, final String fieldName,
                                final Object fieldValue,
-                               final ModelMapperI modelMapper)
-            throws Exception {
+                               final ModelMapperI modelMapper) {
 
         final Object value;
 
@@ -98,45 +98,51 @@ public class FieldStrategy implements Strategy {
             return;
         }
 
-        final var objectValueMapper = StrategyUtil.getSingleValueMapper(field);
+        try {
+            final var objectValueMapper = StrategyUtil.getSingleValueMapper(field);
 
-        if (Objects.isNull(mapValue)) {
-            value = fieldValue;
-        } else if (mapValue.iterate()) {
-            value = StrategyUtil.iterateElements(fieldValue, fieldName, objectValueMapper, modelMapper);
+            if (Objects.isNull(mapValue)) {
+                value = fieldValue;
+            } else if (mapValue.iterate()) {
+                value = StrategyUtil.iterateElements(fieldValue, fieldName, objectValueMapper, modelMapper);
 
-        } else {
-            final var mapFromField = FromField.builder()
-                    .fieldName(fieldName)
-                    .fieldValue(fieldValue)
-                    .build();
+            } else {
+                final var mapFromField = FromField.builder()
+                        .fieldName(fieldName)
+                        .fieldValue(fieldValue)
+                        .build();
 
-            value = objectValueMapper.mapToValue(mapFromField, modelMapper);
-        }
+                value = objectValueMapper.mapToValue(mapFromField, modelMapper);
+            }
 
+            boolean isPrivate = StrategyUtil.setFieldPublic(field, destinationObj);
 
-        boolean isPrivate = StrategyUtil.setFieldPublic(field, destinationObj);
+            field.set(destinationObj, value);
 
-        field.set(destinationObj, value);
-
-        if (isPrivate) {
-            field.setAccessible(false);
+            if (isPrivate) {
+                field.setAccessible(false);
+            }
+        } catch (final Exception ex) {
+            throw new ModelMapperException(ex);
         }
     }
 
-    private void mapFieldValues(final Object destinationObj, final Field field, final Set<FromField> fromFieldSet)
-            throws Exception {
+    private void mapFieldValues(final Object destinationObj, final Field field, final Set<FromField> fromFieldSet) {
 
-        final var value = field.isAnnotationPresent(MapValues.class) ?
-                StrategyUtil.getMultiValueMapper(field).mapToValue(fromFieldSet) :
-                null;
+        try {
+            final var value = field.isAnnotationPresent(MapValues.class) ?
+                    StrategyUtil.getMultiValueMapper(field).mapToValue(fromFieldSet) :
+                    null;
 
-        boolean isPrivate = StrategyUtil.setFieldPublic(field, destinationObj);
+            boolean isPrivate = StrategyUtil.setFieldPublic(field, destinationObj);
 
-        field.set(destinationObj, value);
+            field.set(destinationObj, value);
 
-        if (isPrivate) {
-            field.setAccessible(false);
+            if (isPrivate) {
+                field.setAccessible(false);
+            }
+        } catch (final Exception ex) {
+            throw new ModelMapperException(ex);
         }
     }
 }
